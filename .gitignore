@@ -1,4 +1,6 @@
 
 *.pyc
+grosus.db
 flask
 __pycache__
+db_repository
