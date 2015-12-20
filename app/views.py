@@ -1,9 +1,17 @@
-from app import grosus
-from flask import render_template, redirect, flash
+from app import grosus, db, login_manager
+from flask import render_template, redirect, flash, url_for
+from flask.ext.login import login_required, login_user, current_user, logout_user
 from .forms import LoginForm
+from .models import User
+
+@login_manager.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
 
 @grosus.route('/')
 @grosus.route('/index')
+@login_required
 def index():
     user = {'nickname': 'Musterman'} # fake user
     return render_template('index.html',
@@ -15,7 +23,24 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         flash('Login requested for "%s"' % form.login.data)
-        return redirect('/index')
+        # create new user and add it to database if not existed
+        user = User.query.filter_by(login=form.login.data).first()
+        if user is None:
+            user = User(login=form.login.data)
+            db.session.add(user)
+            db.session.commit()
+        
+        login_user(user)
+        return redirect(url_for('index'))
     return render_template('login.html',
                            title='Sign in',
                            form=form)
+
+@grosus.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
+
+@login_manager.unauthorized_handler
+def unauthorized_handler():
+    return redirect(url_for('login'))
