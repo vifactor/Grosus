@@ -9,6 +9,7 @@
     <body>
         <a href="{{ url_for('index') }}">Home</a>
         {% if current_user.is_authenticated %}
+        | <a href="{{ url_for('deputies') }}">Deputies</a>
         | <a href="{{ url_for('logout') }}">Logout</a>
         {% endif %}
         <hr>

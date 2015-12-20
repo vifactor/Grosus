@@ -18,6 +18,16 @@ def index():
                           title='Home',
                           user=user)
 
+@grosus.route('/deputies')
+@login_required
+def deputies():
+    deputies = [{'name': 'Musterman', 'group': 'Communists'}, # fake deputies
+                {'name': 'Muller', 'group': 'Liberals'},
+                {'name': 'Smith', 'group': 'Democrats'}]
+    return render_template('deputies.html',
+                          title='Deputies',
+                          deputies=deputies)
+
 @grosus.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
