@@ -30,6 +30,14 @@ def deputies():
                           title='Deputies',
                           deputies=deputies)
 
+@grosus.route('/laws')
+@login_required
+def laws():
+    laws = [1, 2, 3, 4, 5]
+    return render_template('laws.html',
+                          title='Laws',
+                          laws=laws)
+
 @grosus.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
