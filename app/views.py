@@ -23,7 +23,9 @@ def index():
 def deputies():
     deputies = [{'name': 'Musterman', 'group': 'Communists'}, # fake deputies
                 {'name': 'Muller', 'group': 'Liberals'},
-                {'name': 'Smith', 'group': 'Democrats'}]
+                {'name': 'Smith', 'group': 'Democrats'},
+                {'name': 'Smith', 'group': 'Democrats'},
+                {'name': 'Smith', 'group': 'Democrats'}, {'name': 'Smith', 'group': 'Democrats'}]
     return render_template('deputies.html',
                           title='Deputies',
                           deputies=deputies)

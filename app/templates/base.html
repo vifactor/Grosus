@@ -5,7 +5,16 @@
         {% else %}
         <title>Welcome to grosus project</title>
         {% endif %}
-        </head>
+    <style>
+    .vertical-gap {
+     margin-bottom: 1cm;
+    }
+    .glyphicon { margin-right:5px;}
+    .rating .glyphicon {font-size: 22px;}
+    .rating-num { margin-top:0px;font-size: 54px; }
+    </style>
+    <link  rel="stylesheet"  href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    </head>
     <body>
         <a href="{{ url_for('index') }}">Home</a>
         {% if current_user.is_authenticated %}
