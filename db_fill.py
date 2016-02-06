@@ -5,9 +5,9 @@ from app import db
 from selenium import webdriver
 import json
 import time
-# from django.db import IntegrityError
 
-delay_time = 2
+# webpage loading time 
+delay_time = 1 # second
 
 def get_days(driver):
     """Getting days"""
@@ -15,7 +15,7 @@ def get_days(driver):
     time.sleep(delay_time)
 
     driver.find_element_by_xpath(".//ul[@class='m_ses']/li[@onclick][3]").click()
-    time.sleep(delay_time + 1)
+    time.sleep(delay_time)
 
     voting_days = driver.find_elements_by_xpath('//li[@style="background-color:#FFFFAE;"]/a[@href]')
     voting_days = [elem.get_attribute("href") for elem in voting_days]
@@ -24,7 +24,7 @@ def get_days(driver):
 def get_laws_from_page(driver, day_link):
     """Loading law page, getting nums and links"""
     driver.get(day_link)
-    time.sleep(delay_time + 1)
+    time.sleep(delay_time)
     laws = driver.find_elements_by_xpath('//div[@class="nomer"]/a')
     law_numbers = [elem.get_attribute("text") for elem in laws if elem.get_attribute("text") != '\xa0']
     law_links = [elem.get_attribute("href") for elem in laws if elem.get_attribute("text") != '\xa0']
@@ -35,9 +35,9 @@ def get_laws_from_page(driver, day_link):
 def get_needed_columns(driver):
     """Getting needed columns"""
     trails = []
-    for row in driver.find_elements_by_xpath("//div[@id='Data_gol']/*[@id='list_g']/ul/li"):
-        time.sleep(delay_time + 1)
-        print("   looping through trail rows info")
+    for row in driver.find_elements_by_xpath("//div[@id='Data_gol']/*[@id='list_g']/ul/li")[1:]:
+        time.sleep(delay_time)
+        #print("   looping through trail rows info")
         try:
             row_id = row.find_element_by_xpath(".//div[@class='fr_nomer']").get_attribute("innerHTML")
             row_id = row_id.replace(".", "")
@@ -48,14 +48,14 @@ def get_needed_columns(driver):
             rishennya = votes.split("-")[-1].split(" ", 1)[1]
             trails.append((row_id, date, descr, rishennya))
         except:
-            print("   Error\n Row: \n {0}".format(row.text))
+            print("Unsupported format in row: {0}".format(row.text))
 
     trails_table = []
     for elem in trails:
         if u"Поіменне голосування про проект" in elem[2]:
             trails_table.append(elem)
     needed_columns = [item[0] for item in trails_table]
-    print("\tneeded columns:", needed_columns)
+    #print("\tneeded columns:", needed_columns)
     return needed_columns
 
 def get_dep_list(driver):
@@ -69,7 +69,7 @@ def get_all_column_numbers(driver):
     headings = driver.find_elements_by_xpath("//*[@id='list_g']/ul/table[1]/tbody/tr[1]")[0].text
     if headings:
         columns = headings.split(" ", 2)[2].split(" ")
-        print("   All columns:", columns)
+        #print("   All columns:", columns)
     return columns
 
 def get_golosuv_info(driver, needed_columns, columns, dep_list):
@@ -105,47 +105,45 @@ if __name__ == '__main__':
     voting_days = get_days(driver)
     # import ipdb; ipdb.set_trace()
 
-    for day_link in voting_days[15:16]:
+    selected_voting_days = voting_days[15:16]
+    nb_voting_days = len(selected_voting_days)
+    
+    for iday, day_link in enumerate(selected_voting_days):
         laws = get_laws_from_page(driver, day_link)
-        for law_num, law_link, law_name in laws:
-            print("Getting law number {0} page. ".format(law_num))
+        nb_laws = len(day_link)
+        
+        for ilaw, (law_num, law_link, law_name) in enumerate(laws):
+            print("Day %d/%d, Law %d/%d" % (iday, nb_voting_days, ilaw, nb_laws))
+            print("Processing law number {0}".format(law_num))
             url = law_link + "#ui-tabs-2"
             driver.get(url)
-            time.sleep(delay_time + 2)
+            time.sleep(delay_time + 1)
             try:
                 # click 'details'
                 driver.find_element_by_xpath(".//div[@class='vid_d']/p[@id='name_input']").click()
-                time.sleep(delay_time + 1)
+                time.sleep(delay_time)
 
                 needed_columns = get_needed_columns(driver)
                 dep_list = get_dep_list(driver)
                 columns = get_all_column_numbers(driver)
                 golosuvannya = get_golosuv_info(driver, needed_columns, columns, dep_list)
-
-                with open('data/law_{0}.json'.format(law_num), 'w') as out:
-                    out.write(json.dumps(golosuvannya, indent=2))
+                
+                ### UNCOMMENT THIS IF YOU WANT TO HAVE ALSO JSON FILES WITH VOTING DATA  
+                #with open('data/law_{0}.json'.format(law_num), 'w') as out:
+                #    out.write(json.dumps(golosuvannya, indent=2))
 
                 if not Law.query.filter_by(code=law_num).count():
-                    print ("\tTrying to add a law: %s - %s" % (law_num, law_name))
-                    #with db.session.begin_nested():
+                    print ("\tAdding law: %s - %s" % (law_num, law_name))
                     law = Law(code=law_num, title=law_name, authors=[])
-                    
                     db.session.add(law)
 
-                    # except IntegrityError:
-                    #     law = Law.query.filter(Law.code == law_num).first()
-
-                    # law = Law(code=law_num, title=law_name, authors=[])
-                    # db.session.add(law)
 
                 for name in golosuvannya['deputies']:
-                     print ("   Checking deputies...")
                      if not Deputy.query.filter_by(name=name).count():
-                         deputy = Deputy(name=name, group="")
-                         db.session.add(deputy)
-                         #print ('Is name a string? - ', isinstance(name, str))
-                         print("\tDeputy added: %s" % name)
+                        print("\tAdding deputy %s" % name)
+                        deputy = Deputy(name=name, group="")
+                        db.session.add(deputy)
                          
                 db.session.commit()
             except Exception as err:
-                print(" ! Smth failed in law {0}, error: {1}".format(law_num, err))
+                print("! Smth failed in law {0}, error: {1}".format(law_num, err))
