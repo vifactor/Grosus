@@ -105,7 +105,7 @@ if __name__ == '__main__':
     voting_days = get_days(driver)
     # import ipdb; ipdb.set_trace()
 
-    selected_voting_days = voting_days[15:16]
+    selected_voting_days = voting_days[17:19]
     nb_voting_days = len(selected_voting_days)
     
     for iday, day_link in enumerate(selected_voting_days):
@@ -136,14 +136,21 @@ if __name__ == '__main__':
                     print ("\tAdding law: %s - %s" % (law_num, law_name))
                     law = Law(code=law_num, title=law_name, authors=[])
                     db.session.add(law)
+                    db.session.commit()
 
-
-                for name in golosuvannya['deputies']:
-                     if not Deputy.query.filter_by(name=name).count():
-                        print("\tAdding deputy %s" % name)
-                        deputy = Deputy(name=name, group="")
-                        db.session.add(deputy)
-                         
-                db.session.commit()
+                    for name in golosuvannya['deputies']:
+                        deputy = Deputy.query.filter_by(name=name).one_or_none()
+                        if deputy is None:#Deputy.query.filter_by(name=name).count():
+                            print("\tAdding deputy %s" % name)
+                            deputy = Deputy(name=name, group="")
+                            db.session.add(deputy)
+                            db.session.commit()
+                        
+                        # Here you should add the following to save votings in the database:
+                        # Either
+                        # deputy.accept(law) # if the law was supported by the current deputy
+                        # Or
+                        # deputy.reject(law) # otherwise
+                        
             except Exception as err:
                 print("! Smth failed in law {0}, error: {1}".format(law_num, err))
