@@ -26,17 +26,26 @@ class Deputy(db.Model):
         # FIXME
         return 0
     
-    def accept(self, law):
-        """Adds 'True' vote to the Deputy voting table"""
-        vote = DeputyVote(deputy_id = self.id, law_id = law.id, vote_option = True)
+    def vote(self, law, option, attempt=1):
+        vote = DeputyVote(deputy_id = self.id, law_id = law.id,
+                            attempt=attempt, option = option)
         db.session.add(vote)
         db.session.commit()
+    
+    def support(self, law, attempt = 1):
+        self.vote(law, 1, attempt)
         
-    def reject(self, law):
-        """Adds 'True' vote to the Deputy voting table"""
-        vote = DeputyVote(deputy_id = self.id, law_id = law.id, vote_option = False)
-        db.session.add(vote)
-        db.session.commit()
+    def reject(self, law, attempt = 1):
+        self.vote(law, 2, attempt)
+    
+    def abstain(self, law, attempt = 1):
+        self.vote(law, 3, attempt)
+        
+    def do_not_vote(self, law, attempt = 1):
+        self.vote(law, 4, attempt)
+    
+    def set_absent(self, law, attempt = 1):
+        self.vote(law, 5, attempt)
 
 
 class Law(db.Model):
@@ -53,13 +62,19 @@ class Law(db.Model):
     def __repr__(self):
         return '<Law %s: "%s">' % (self.code, self.title)
 
-from sqlalchemy import Enum
+
 class DeputyVote(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    deputy_id = db.Column(db.Integer, db.ForeignKey('deputy.id'))
-    law_id = db.Column(db.Integer, db.ForeignKey('law.id'))
-    # True if law is accepted
-    # False if law is rejected
-    vote_option = db.Column(db.Boolean)
+    deputy_id = db.Column(db.Integer, db.ForeignKey('deputy.id'), primary_key=True)
+    law_id = db.Column(db.Integer, db.ForeignKey('law.id'), primary_key=True)
+    # one law can be voted several times: this is vote attempt number
+    attempt = db.Column(db.SmallInteger, primary_key=True)
+    # Deputy vote options
+    # 1 = support
+    # 2 = reject
+    # 3 = abstained
+    # 4 = did not vote
+    # 5 = absent
+    option = db.Column(db.SmallInteger)
     
-    __table_args__ = (UniqueConstraint('deputy_id', 'law_id', name='_deputy_vote_for_law'),)
+    __table_args__ = (UniqueConstraint('deputy_id', 'law_id', 'attempt',
+                        name='_deputy_vote_for_law'),)
