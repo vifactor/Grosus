@@ -16,8 +16,8 @@ authorship = db.Table('authorship',
 
 class Deputy(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(64), index=True)
-    group = db.Column(db.String(64), index=True)
+    name = db.Column(db.String(64), unique=True)
+    group = db.Column(db.String(64))
 
     def __repr__(self):
         return '<Deputy %s (%s)>' % (self.name, self.group)
@@ -50,7 +50,7 @@ class Deputy(db.Model):
 
 class Law(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(16))
+    code = db.Column(db.String(16), unique=True)
     title = db.Column(db.String(1024))
     authors = db.relationship('Deputy',
                             secondary = authorship,
