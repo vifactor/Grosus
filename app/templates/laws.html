@@ -3,9 +3,11 @@
   <hr>
   <div  class="row">
     <div  class="col-lg-12">
-      {% for law in laws %}
+      {% for law in laws.items %}
         {% include 'law.html' %}
       {% endfor %}
     </div>
   </div>
+{% if laws.has_prev %}<a href="{{ url_for('laws', page=laws.prev_num) }}">&lt;&lt; Previous laws</a>{% else %}&lt;&lt; Previous laws{% endif %} | 
+{% if laws.has_next %}<a href="{{ url_for('laws', page=laws.next_num) }}">Next laws &gt;&gt;</a>{% else %}Next laws &gt;&gt;{% endif %}
 {%endblock%}

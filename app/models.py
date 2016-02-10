@@ -8,6 +8,12 @@ class User(db.Model, UserMixin):
     
     def __repr__(self):
         return '<User %r>' % self.login
+        
+    def laws_to_vote(self):
+        """Returns all laws from the database. In future, it is expected that 
+        laws proposed to be voted by a user will be chosen according to
+        some algorithm"""
+        return Law.query.all()
 
 authorship = db.Table('authorship',
     db.Column('law_id', db.Integer, db.ForeignKey('law.id')),
