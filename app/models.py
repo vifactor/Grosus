@@ -28,7 +28,7 @@ class Deputy(db.Model):
     def __repr__(self):
         return '<Deputy %s (%s)>' % (self.name, self.group)
     
-    def get_rating(self, user_id):
+    def get_rating(self, user):
         # FIXME
         return 0
     

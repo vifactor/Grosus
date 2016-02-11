@@ -9,4 +9,5 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'grosus.db')
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
 SQLALCHEMY_TRACK_MODIFICATIONS = True
 
-POSTS_PER_PAGE = 3
+LAWS_PER_PAGE = 3
+DEPUTIES_PER_PAGE = 8

@@ -2,8 +2,8 @@ from app import grosus, db, login_manager
 from flask import render_template, redirect, flash, url_for
 from flask.ext.login import login_required, login_user, current_user, logout_user
 from .forms import LoginForm
-from .models import User, Law
-from config import POSTS_PER_PAGE
+from .models import User, Law, Deputy
+from config import LAWS_PER_PAGE, DEPUTIES_PER_PAGE
 
 @login_manager.user_loader
 def load_user(id):
@@ -20,13 +20,10 @@ def index():
                           user=user)
 
 @grosus.route('/deputies')
+@grosus.route('/deputies/<int:page>')
 @login_required
-def deputies():
-    deputies = [{'name': 'Musterman', 'group': 'Communists'}, # fake deputies
-                {'name': 'Muller', 'group': 'Liberals'},
-                {'name': 'Smith', 'group': 'Democrats'},
-                {'name': 'Smith', 'group': 'Democrats'},
-                {'name': 'Smith', 'group': 'Democrats'}, {'name': 'Smith', 'group': 'Democrats'}]
+def deputies(page=1):
+    deputies = Deputy.query.paginate(page, DEPUTIES_PER_PAGE, True)
     return render_template('deputies.html',
                           title='Deputies',
                           deputies=deputies)
@@ -35,7 +32,7 @@ def deputies():
 @grosus.route('/laws/<int:page>')
 @login_required
 def laws(page=1):
-    laws = Law.query.paginate(page, POSTS_PER_PAGE, True)
+    laws = Law.query.paginate(page, LAWS_PER_PAGE, True)
     return render_template('laws.html',
                           title='Laws',
                           laws=laws)
