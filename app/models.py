@@ -84,3 +84,16 @@ class DeputyVote(db.Model):
     
     __table_args__ = (UniqueConstraint('deputy_id', 'law_id', 'attempt',
                         name='_deputy_vote_for_law'),)
+                        
+                        
+class UserVote(db.Model):
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    law_id = db.Column(db.Integer, db.ForeignKey('law.id'), primary_key=True)
+    # Deputy vote options
+    # 1 = support
+    # 2 = reject
+    # 3 = ignore
+    option = db.Column(db.SmallInteger)
+    
+    __table_args__ = (UniqueConstraint('user_id', 'law_id',
+                        name='_user_vote_for_law'),)
