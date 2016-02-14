@@ -91,9 +91,11 @@ class UserVote(db.Model):
     law_id = db.Column(db.Integer, db.ForeignKey('law.id'), primary_key=True)
     # Deputy vote options
     # 1 = support
-    # 2 = reject
-    # 3 = ignore
+    # -1 = reject
+    # 0 = ignore
     option = db.Column(db.SmallInteger)
+    user = db.relationship('User', backref=db.backref('votes', lazy='dynamic'))
+    law = db.relationship('Law', backref=db.backref('votes', lazy='dynamic'))
     
     __table_args__ = (UniqueConstraint('user_id', 'law_id',
                         name='_user_vote_for_law'),)

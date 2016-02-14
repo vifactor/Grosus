@@ -1,18 +1,14 @@
 from app import grosus, db, login_manager
-from flask import render_template, redirect, flash, url_for, g
+from flask import render_template, redirect, flash, url_for
 from flask.ext.login import login_required, login_user, current_user, logout_user
 from .forms import LoginForm
-from .models import User, Law, Deputy
+from .models import User, Law, Deputy, UserVote
 from config import LAWS_PER_PAGE, DEPUTIES_PER_PAGE
+from sqlalchemy.orm import aliased
 
 @login_manager.user_loader
 def load_user(id):
     return User.query.get(int(id))
-
-@grosus.before_request
-def before_request():
-   g.user = current_user
-
 
 @grosus.route('/')
 @grosus.route('/index')
@@ -36,7 +32,13 @@ def deputies(page=1):
 @grosus.route('/laws/<int:page>')
 @login_required
 def laws(page=1):
-    laws = Law.query.paginate(page, LAWS_PER_PAGE, True)
+    ## We do not show laws for which user has already voted
+    current_user_votes_query = UserVote.query.filter(UserVote.user_id == current_user.id).subquery()
+    current_user_votes_alias = aliased(UserVote, current_user_votes_query)
+    not_voted_laws = Law.query.outerjoin(current_user_votes_alias)\
+                                .filter(current_user_votes_alias.law_id == None)
+
+    laws = not_voted_laws.paginate(page, LAWS_PER_PAGE, True)
     return render_template('laws.html',
                           title='Laws',
                           laws=laws)
@@ -46,7 +48,9 @@ def laws(page=1):
 def support(law_id):
     """This method allows the current user to add record to a database that law 
     with law_id is supported by him"""
-    print(g.user, "supported law: %d" % law_id)
+    user_vote = UserVote(user_id=current_user.id, law_id=law_id, option=1)
+    db.session.add(user_vote)
+    db.session.commit()
     return redirect(url_for('laws'))
     
 @grosus.route('/reject/<int:law_id>')
@@ -54,7 +58,9 @@ def support(law_id):
 def reject(law_id):
     """This method allows the current user to add record to a database that law 
     with law_id is not supported by him"""
-    print("User %s rejected law: %d" % (current_user.login, law_id))
+    user_vote = UserVote(user_id=current_user.id, law_id=law_id, option=-1)
+    db.session.add(user_vote)
+    db.session.commit()
     return redirect(url_for('laws'))
 
 @grosus.route('/ignore/<int:law_id>')
@@ -62,7 +68,9 @@ def reject(law_id):
 def ignore(law_id):
     """This method allows the current user to add record to a database that law 
     with law_id is ignored by him"""
-    print("User %s ignored law: %d" % (current_user.login, law_id))
+    user_vote = UserVote(user_id=current_user.id, law_id=law_id, option=0)
+    db.session.add(user_vote)
+    db.session.commit()
     return redirect(url_for('laws'))
 
 @grosus.route('/login', methods=['GET', 'POST'])
