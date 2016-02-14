@@ -1,5 +1,5 @@
 from app import grosus, db, login_manager
-from flask import render_template, redirect, flash, url_for
+from flask import render_template, redirect, flash, url_for, g
 from flask.ext.login import login_required, login_user, current_user, logout_user
 from .forms import LoginForm
 from .models import User, Law, Deputy
@@ -8,6 +8,10 @@ from config import LAWS_PER_PAGE, DEPUTIES_PER_PAGE
 @login_manager.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
+@grosus.before_request
+def before_request():
+   g.user = current_user
 
 
 @grosus.route('/')
@@ -36,6 +40,30 @@ def laws(page=1):
     return render_template('laws.html',
                           title='Laws',
                           laws=laws)
+                          
+@grosus.route('/support/<int:law_id>')
+@login_required
+def support(law_id):
+    """This method allows the current user to add record to a database that law 
+    with law_id is supported by him"""
+    print(g.user, "supported law: %d" % law_id)
+    return redirect(url_for('laws'))
+    
+@grosus.route('/reject/<int:law_id>')
+@login_required
+def reject(law_id):
+    """This method allows the current user to add record to a database that law 
+    with law_id is not supported by him"""
+    print("User %s rejected law: %d" % (current_user.login, law_id))
+    return redirect(url_for('laws'))
+
+@grosus.route('/ignore/<int:law_id>')
+@login_required
+def ignore(law_id):
+    """This method allows the current user to add record to a database that law 
+    with law_id is ignored by him"""
+    print("User %s ignored law: %d" % (current_user.login, law_id))
+    return redirect(url_for('laws'))
 
 @grosus.route('/login', methods=['GET', 'POST'])
 def login():

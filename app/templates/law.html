@@ -1,6 +1,6 @@
     <div  class="col-md-4 text-center">
       <div  class="box">
-        <div  class="box-content"> <span  id="boxclose">x</span>
+        <div  class="box-content"><a class="boxclose" href="{{ url_for('ignore', law_id = law.id) }}"></a>
           <h2  class="tag-title">{{law.code}}</h2>
           <hr>
           <p>{{law.title}}</p>
@@ -13,8 +13,12 @@
           <br>
           Мій голос:
           <div  class="btn-group"> 
-            <a  class="btn btn-danger"  href="#"><i class="fa fa-thumbs-down"></i></a>
-            <a  class="btn btn-success"  href="#"><i class="fa fa-thumbs-up"></i></a>
+            <a  class="btn btn-danger" href="{{ url_for('reject', law_id = law.id) }}">
+                <i class="fa fa-thumbs-down"></i>
+            </a>
+            <a  class="btn btn-success" href="{{ url_for('support', law_id = law.id) }}">
+                <i class="fa fa-thumbs-up"></i>
+            </a>
           </div>
         </div>
       </div>
