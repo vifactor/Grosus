@@ -64,8 +64,13 @@
     }
     
     </style>
-    <link  rel="stylesheet"  href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-    <link  rel="stylesheet"  href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/star-rating.css') }}" media="all" rel="stylesheet"/>
+    
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery-2.2.1.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='js/star-rating.js') }}"></script>
     </head>
     <body>
         <a href="{{ url_for('index') }}">Home</a>
