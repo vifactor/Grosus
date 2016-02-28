@@ -3,11 +3,10 @@
         <div  class="row">
           <div  class="text-center">
             <h1  class="rating-num"> <span  class="glyphicon glyphicon-user"></span></h1>
-            <div  class="rating"> <span  class="glyphicon"  style="font-weight:bold">4.0</span>
-              <span  class="glyphicon glyphicon-star"></span><span  class="glyphicon glyphicon-star">
-              </span><span  class="glyphicon glyphicon-star"></span><span  class="glyphicon glyphicon-star">
-              </span><span  class="glyphicon glyphicon-star-empty"></span> </div>
-            <div  class="vertical-gap"> Based on <span  style="font-weight:bold">12</span>
+            <div>
+                <input id="input-1" class="rating rating-loading" value="{{deputy.get_rating(current_user)}}" data-min="0" data-max="5" data-step="0.1" data-readonly="true" data-show-caption="false" data-show-clear="false"> 
+            </div>
+            <div  class="vertical-gap"> Based on <span  style="font-weight:bold">{{current_user.get_votes_count()}}</span>
               votes </div>
             <div> <span  style="font-weight:bold">{{deputy.name}}</span></div>
             <div> <span  style="font-weight:bold">{{deputy.group}}</span></div>

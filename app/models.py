@@ -2,6 +2,8 @@ from app import db
 from flask.ext.login import UserMixin
 from sqlalchemy import UniqueConstraint
 
+import random # FIXME: remove it when rating calculation is implemented
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     login = db.Column(db.String(64), index=True, unique=True)
@@ -14,6 +16,10 @@ class User(db.Model, UserMixin):
         laws proposed to be voted by a user will be chosen according to
         some algorithm"""
         return Law.query.all()
+    
+    def get_votes_count(self):
+        """ returns nb of votes done by the user """
+        return UserVote.query.filter(UserVote.user_id==self.id).count()
 
 authorship = db.Table('authorship',
     db.Column('law_id', db.Integer, db.ForeignKey('law.id')),
@@ -30,7 +36,7 @@ class Deputy(db.Model):
     
     def get_rating(self, user):
         # FIXME
-        return 0
+        return random.uniform(0, 5)
     
     def vote(self, law, option, attempt=1):
         vote = DeputyVote(deputy_id = self.id, law_id = law.id,
